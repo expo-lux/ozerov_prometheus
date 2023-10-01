@@ -1,0 +1,2 @@
+[prometheus]
+188.166.65.153 ansible_become_pass=unyngywfjiuz ansible_user=user

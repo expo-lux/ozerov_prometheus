@@ -1,0 +1,83 @@
+---
+- name: install python3
+  hosts: all, !runner
+  become: True
+  gather_facts: no
+    
+  tasks:
+    - name: initial
+      raw: user -e /usr/bin/python3 || ( user -e /usr/bin/yum && yum -y install python3 || apt -y install python3 )
+
+- name: initial config
+  hosts: all, !runner
+  become: True
+  gather_subset:
+    - min
+    - all_ipv4_addresses
+    
+  tasks:
+    - name: initial
+      include_role:
+        name: initial
+
+- name: install Prometheus
+  hosts: prometheus
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: install Prometheus
+      include_role: 
+        name: prometheus
+
+    - name: 6. Create 'monitoring' system group
+      ansible.builtin.group:
+        name: monitoring
+        system: true
+        state: present
+
+    - name: 6. Create 'monitoring' system user
+      ansible.builtin.user:
+        name: monitoring
+        system: true
+        shell: "/usr/sbin/nologin"
+        group: monitoring
+        createhome: false
+        home: "{{ prometheus_db_dir }}"      
+
+    - name: 6. Change user in 'prometheus' service
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/system/prometheus.service
+        regexp: '^User='
+        line: User=monitoring
+
+    - name: 6. Change group in 'prometheus' service
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/system/prometheus.service
+        regexp: '^Group='
+        line: Group=monitoring
+
+    - name: 6. Create data directory if it does not exist
+      ansible.builtin.file:
+        path: /var/lib/prometheus
+        owner: monitoring
+        group: monitoring
+        state: directory
+        recurse: True
+        mode: '0755'
+
+    - name: 6. Create config directory if it does not exist
+      ansible.builtin.file:
+        path: /etc/prometheus
+        owner: root
+        group: monitoring
+        state: directory
+        recurse: True
+        mode: '0770'
+
+    - name: 6. Restart prometheus
+      become: true
+      ansible.builtin.systemd:
+        daemon_reload: true
+        name: prometheus
+        state: restarted      
