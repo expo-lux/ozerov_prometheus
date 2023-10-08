@@ -1,0 +1,13 @@
+---
+- name: run tasks by action
+  include_tasks: "run_tasks_by_action.yaml"
+  loop: "{{ prometheus_actions }}"
+  loop_control:
+    loop_var: task_by_action
+  when: use_actions
+  tags: always
+
+- name: run tasks by tags
+  include_tasks: "run_tasks_by_tags.yaml"
+  when: not use_actions
+  tags: always

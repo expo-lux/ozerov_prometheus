@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  author: --------
+  description: --------
+  company: -------
+  min_ansible_version: 2.10
+  license: -----
+
+  platforms:
+    - name: EL
+      versions:
+        - 7
+    - name: Ubuntu
+      versions:
+        - focal
+        - bionic
+dependencies: []
+...

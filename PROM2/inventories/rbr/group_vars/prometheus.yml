@@ -1,0 +1,6 @@
+prometheus_user: monitoring
+prometheus_group: monitoring
+prometheus_db_dir: /var/lib/prometheus/data
+prometheus_web_listen_address: "0.0.0.0:9090"
+prometheus_binary_install_dir: /opt/prometheus
+prometheus_config_dir: /opt/prometheus

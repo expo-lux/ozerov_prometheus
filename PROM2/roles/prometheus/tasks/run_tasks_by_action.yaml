@@ -1,0 +1,6 @@
+---
+- include_tasks: "{{ run_task }}.yaml"
+  loop: "{{ actions_tasks_map[task_by_action] | d([]) }}"
+  loop_control:
+    loop_var: run_task
+  tags: always

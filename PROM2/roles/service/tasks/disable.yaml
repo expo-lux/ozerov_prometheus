@@ -1,0 +1,7 @@
+- name: Disable service "{{ name }}"
+  systemd:
+    name: "{{ name }}"
+    enabled: no
+    masked: no
+    daemon_reload: yes
+  tags: always

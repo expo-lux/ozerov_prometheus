@@ -1,0 +1,5 @@
+[prometheus]
+165.22.206.124 ansible_become_pass=jfnpinpmcjha; ansible_user=user
+
+[node_exporter]
+165.22.206.124 ansible_become_pass=jfnpinpmcjha; ansible_user=user

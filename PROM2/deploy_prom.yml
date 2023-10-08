@@ -1,0 +1,68 @@
+---
+- name: install python3
+  hosts: all, !runner
+  become: True
+  gather_facts: no
+    
+  tasks:
+    - name: initial
+      raw: user -e /usr/bin/python3 || ( user -e /usr/bin/yum && yum -y install python3 || apt -y install python3 )
+
+- name: initial config
+  hosts: all, !runner
+  become: True
+  gather_subset:
+    - min
+    - all_ipv4_addresses
+    
+  tasks:
+    - name: initial
+      include_role:
+        name: initial
+
+- name: install Prometheus
+  hosts: prometheus
+  become: True
+  gather_facts: True
+  vars:
+    job:
+      params:
+        actions:
+          - install
+          - reconfigure
+          - start
+          - check
+
+  tasks:
+    - name: Import a Prometheus role
+      import_role:
+        name: prometheus  
+
+- name: install Node exporter
+  hosts: node_exporter
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: 2.1 Make directory
+      ansible.builtin.file:
+        path: "{{ node_exporter_binary_install_dir }}"
+        state: directory
+        recurse: True
+        mode: '0777'
+
+    - name: Import a Node exporter role
+      import_role:
+        name: prometheus.prometheus.node_exporter
+
+    - name: 2.4 Change user in 'node_exporter' service
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/system/node_exporter.service
+        regexp: '^User='
+        line: User=monitoring
+
+    - name: 2.4 Change group in 'node_exporter' service
+      ansible.builtin.lineinfile:
+        path: /etc/systemd/system/node_exporter.service
+        regexp: '^Group='
+        line: Group=monitoring

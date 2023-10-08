@@ -1,0 +1,7 @@
+- name: Enable service "{{ name }}"
+  systemd:
+    name: "{{ name }}"
+    enabled: yes
+    daemon-reload: yes
+    masked: no 
+  tags: always

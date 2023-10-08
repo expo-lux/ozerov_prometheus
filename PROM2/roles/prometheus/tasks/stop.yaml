@@ -1,0 +1,9 @@
+---
+- include_role:
+    name: service
+  vars:
+    name: prometheus
+    service_role_action:
+      - stop
+      - disable
+  tags: always

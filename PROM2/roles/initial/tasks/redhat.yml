@@ -1,0 +1,45 @@
+---
+  - name: Install libselinux-python3
+    yum:
+      name:
+        - libselinux-python3
+    vars:
+      ansible_python_interpreter: /usr/bin/python
+
+  - name: Install python packages
+    ansible.builtin.pip:
+      name: "{{ item }}"
+    loop:
+      - lxml>=2.3.0
+
+  - name: Put SELinux in permissive mode, logging actions that would be blocked.
+    selinux:
+      policy: targeted
+      state: permissive
+
+  - name: copy forkstat
+    copy:
+      dest: /usr/local/sbin
+      src:  forkstat
+      mode:  755
+
+  - name: Install helper (core) packages
+    yum:
+      name:
+        - epel-release #htop dependency
+        - ca-certificates
+      state: latest
+    vars:
+      ansible_python_interpreter: /usr/bin/python
+
+  - name: Install helper packages
+    yum:
+      name:
+        - vim
+        - wget
+        - nc        
+        - htop
+        - yum-utils #see files in bash package: repoquery --list bash
+        - python-psycopg2
+    vars:
+      ansible_python_interpreter: /usr/bin/python

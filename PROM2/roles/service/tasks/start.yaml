@@ -1,0 +1,6 @@
+- name: Start service "{{ name }}"
+  systemd:
+    name: "{{ name }}"
+    state: started
+    daemon_reload: yes
+  tags: always

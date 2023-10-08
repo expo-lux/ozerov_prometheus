@@ -1,0 +1,28 @@
+---
+- block:
+
+  - name: "Sanity check of variables: one of 'roles_systemd_unit_args.copy_src' or 'roles_systemd_unit_args.template_src' and 'roles_systemd_unit_args.service_name' must be defined"
+    fail:
+    when: ((roles_systemd_unit_args.copy_src is not defined) and (roles_systemd_unit_args.template_src is not defined)) or ((roles_systemd_unit_args.copy_src is defined) and (roles_systemd_unit_args.template_src is defined)) or (roles_systemd_unit_args.service_name is not defined)
+
+  - name: "Copy /etc/systemd/system/{{ roles_systemd_unit_args.copy_src | basename }}"
+    copy:
+      src: "{{ roles_systemd_unit_args.copy_src }}"
+      dest: "/etc/systemd/system/{{ roles_systemd_unit_args.service_name }}.service"
+      mode: '644'
+    when: roles_systemd_unit_args.copy_src is defined
+
+  - name: "Template /etc/systemd/system/{{ (roles_systemd_unit_args.template_src | splitext)[0] | basename }}"
+    template:
+      src: "{{ roles_systemd_unit_args.template_src }}"
+      dest: "/etc/systemd/system/{{ roles_systemd_unit_args.service_name }}.service"
+      mode: '644'
+    when: roles_systemd_unit_args.template_src is defined
+
+  tags:
+    - install
+    - enable
+    - disable
+    - start
+    - stop
+    - restart

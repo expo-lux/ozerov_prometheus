@@ -1,0 +1,9 @@
+---
+- name: "Port {{ prometheus_web_listen_address.split(':')[1] }} availability"
+  wait_for:
+    port: "{{ prometheus_web_listen_address.split(':')[1] }}"
+    timeout: 30
+  register: check_port_register
+  retries: 3
+  delay: 10
+  until: check_port_register is not failed

@@ -1,0 +1,32 @@
+---
+  - name: Stop auto-upgrades
+    copy:
+      dest: /etc/apt/apt.conf.d/20auto-upgrades
+      src:  20auto-upgrades
+
+  - name: Stop thrash services
+    systemd:
+      state: stopped
+      name: "{{ item }}"
+      enabled: no
+    loop:
+      - unattended-upgrades
+      - apt-daily-upgrade.timer
+      - apt-daily.timer
+
+  - name: Wait for automatic system updates or digitalocean agent (droplet-agent) install
+    become: True
+    shell: while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 5; done;
+
+  - name: Install helper packages
+    apt:
+      update_cache: yes
+      name:
+        - forkstat  
+        - python3-psycopg2
+        - python3-pip
+
+  - name: Install lxml python package
+    ansible.builtin.pip:
+      name: lxml>=2.3.0
+

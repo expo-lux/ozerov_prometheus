@@ -1,0 +1,6 @@
+- name: Stop service "{{ name }}"
+  systemd:
+    name: "{{ name }}"
+    state: stopped
+    daemon_reload: yes
+  tags: always

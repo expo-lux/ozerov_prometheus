@@ -1,0 +1,28 @@
+- include_tasks: "{{ item }}.yaml"
+  with_items: "{{ service_role_action }}"
+  when: service_role_action is defined 
+  tags: always
+
+- include_tasks: enable.yaml
+  when: service_role_action is not defined
+  tags: [never, install, enable]
+
+- include_tasks: disable.yaml
+  when: service_role_action is not defined
+  tags: [never, disable]
+
+- include_tasks: reload.yaml
+  when: service_role_action is not defined
+  tags: [never, reload]
+
+- include_tasks: restart.yaml
+  when: service_role_action is not defined
+  tags: [never, restart]
+
+- include_tasks: stop.yaml
+  when: service_role_action is not defined
+  tags: [never, stop]
+
+- include_tasks: start.yaml
+  when: service_role_action is not defined
+  tags: [never, start]

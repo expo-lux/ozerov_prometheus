@@ -1,0 +1,51 @@
+---
+use_actions: >-
+  {{ (prometheus_actions is defined)
+    and (prometheus_actions | type_debug == 'list')
+    and (prometheus_actions | length > 0)
+  }}
+
+actions_tasks_map:
+  check:
+    - check
+  install:
+    - install
+  start:
+    - start
+  stop:
+    - stop
+  restart:
+    - restart
+  upgrade:
+    - stop
+    - install
+    - start
+  expand:
+    - check
+    - install
+    - expand
+    - reconfigure
+    - restart
+  reconfigure:
+    - reconfigure
+  uninstall:
+    - check_before_uninstall
+    - stop
+    - uninstall
+  service_state:
+    - service_state
+
+go_arch_map:
+  i386: '386'
+  x86_64: 'amd64'
+  aarch64: 'arm64'
+  armv7l: 'armv7'
+  armv6l: 'armv6'
+
+go_arch: "{{ go_arch_map[ansible_architecture] | default(ansible_architecture) }}"
+
+_prometheus_selinux_packages: "{{ ['libselinux-python', 'policycoreutils-python']
+                               if ansible_python_version is version('3', '<') else
+                               ['python3-libselinux', 'python3-policycoreutils'] }}"
+_prometheus_repo: "prometheus/prometheus"
+_github_api_headers: "{{ {'GITHUB_TOKEN': lookup('ansible.builtin.env', 'GITHUB_TOKEN')} if (lookup('ansible.builtin.env', 'GITHUB_TOKEN')) else {} }}"

@@ -1,0 +1,60 @@
+---
+- include_tasks: check.yaml
+  tags:
+    - never
+    - check
+    - expand
+
+- include_tasks: precheck.yaml
+  tags:
+    - never
+    - precheck
+    - upgrade
+
+- include_tasks: check_before_uninstall.yaml
+  tags:
+    - never
+    - uninstall
+
+- include_tasks: stop.yaml
+  tags:
+    - never
+    - stop
+    - upgrade
+    - uninstall
+
+- include_tasks: install.yaml
+  tags:
+    - never
+    - install
+    - upgrade
+    - expand
+
+- include_tasks: start.yaml
+  tags:
+    - never
+    - start
+    - upgrade
+
+- include_tasks: expand.yaml
+  tags:
+    - never
+    - expand
+
+- include_tasks: reconfigure.yaml
+  tags:
+    - never
+    - reconfigure
+    - expand
+
+- include_tasks: restart.yaml
+  tags:
+    - never
+    - restart
+    - expand
+
+- include_tasks: uninstall.yaml
+  tags:
+    - never
+    - uninstall
+
