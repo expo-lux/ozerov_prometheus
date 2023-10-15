@@ -1,0 +1,4 @@
+mysqld_exporter_binary_install_dir: "/opt/mysqld_exporter"
+mysqld_exporter_username: exporter
+mysqld_exporter_password: secret
+mysqld_exporter_web_listen_address: "0.0.0.0:9111"

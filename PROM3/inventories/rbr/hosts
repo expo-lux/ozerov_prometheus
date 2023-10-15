@@ -1,0 +1,5 @@
+[mysql]
+104.248.94.32 ansible_become_pass=fekqprjobdkc; ansible_user=user
+
+[mysql_exporter]
+104.248.94.32 ansible_become_pass=fekqprjobdkc; ansible_user=user

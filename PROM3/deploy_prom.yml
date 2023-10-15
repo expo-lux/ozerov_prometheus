@@ -1,0 +1,61 @@
+---
+- name: install python3
+  hosts: all, !runner
+  become: True
+  gather_facts: no
+    
+  tasks:
+    - name: initial
+      raw: user -e /usr/bin/python3 || ( user -e /usr/bin/yum && yum -y install python3 || apt -y install python3 )
+
+- name: initial config
+  hosts: all, !runner
+  become: True
+  gather_subset:
+    - min
+    - all_ipv4_addresses
+    
+  tasks:
+    - name: initial
+      include_role:
+        name: initial
+
+- name: 1. Install Mysql
+  hosts: mysql
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: Import a Mysql role
+      import_role:
+        name: mysql
+
+- name: 2. Install Mysql exporter
+  hosts: mysql_exporter
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: 2.1 Make directory
+      ansible.builtin.file:
+        path: "{{ mysqld_exporter_binary_install_dir }}"
+        state: directory
+        recurse: True
+        mode: '0777'
+
+    - name: Import a Node exporter role
+      import_role:
+        name: prometheus.prometheus.mysqld_exporter
+
+    - name: 3.1 Replace prometheus.yml
+      copy:
+        dest: /opt/prometheus/prometheus.yml 
+        src:  prometheus.yml
+        mode:  '0644'
+        owner: prometheus
+        group: prometheus
+
+    - name: 3.1 Restart Prometheus
+      systemd:
+        name: prometheus
+        state: restarted

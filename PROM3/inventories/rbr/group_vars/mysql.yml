@@ -1,0 +1,4 @@
+mysql_users:
+  - name: exporter
+    password: secret
+    priv: "*.*:ALL"
