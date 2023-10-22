@@ -1,0 +1,73 @@
+---
+- name: install python3
+  hosts: all, !runner
+  become: True
+  gather_facts: no
+    
+  tasks:
+    - name: initial
+      raw: user -e /usr/bin/python3 || ( user -e /usr/bin/yum && yum -y install python3 || apt -y install python3 )
+
+- name: initial config
+  hosts: all, !runner
+  become: True
+  gather_subset:
+    - min
+    - all_ipv4_addresses
+    
+  tasks:
+    - name: initial
+      include_role:
+        name: initial
+
+- hosts: pushgateway
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: 1.1 Make directory
+      ansible.builtin.file:
+        path: "{{ pushgateway_binary_install_dir }}"
+        state: directory
+        recurse: True
+        mode: '0777'
+
+    - name: 1.1 Import a Node exporter role
+      import_role:
+        name: prometheus.prometheus.pushgateway
+
+    - debug:
+        msg: "http://localhost:{{ port }}/metrics/job/test1/instance/app1"
+      vars:
+        port: "{{ pushgateway_web_listen_address.split(':')[1] }}"        
+
+    - name: 2.Push time_run metric
+      uri:
+        url: "http://localhost:{{ port }}/metrics/job/test1/instance/app1"
+        method: POST
+        body_format: form-urlencoded
+        body: "# TYPE time_run gauge\ntime_run 3.14\n"
+      vars:
+        port: "{{ pushgateway_web_listen_address.split(':')[1] }}"
+
+    - name: 2.Push time_run metric 2
+      uri:
+        url: "http://{{ ansible_fqdn }}:{{ port }}/metrics/job/test1/instance/app2"
+        method: POST
+        body_format: form-urlencoded
+        body: "# TYPE time_run gauge\ntime_run 6.18\n"
+      vars:
+        port: "{{ pushgateway_web_listen_address.split(':')[1] }}"
+
+    - name: 3.1 Replace prometheus.yml
+      copy:
+        dest: /opt/prometheus/prometheus.yml 
+        src:  prometheus.yml
+        mode:  '0644'
+        owner: prometheus
+        group: prometheus
+
+    - name: 3.1 Restart Prometheus
+      systemd:
+        name: prometheus
+        state: restarted

@@ -1,0 +1,2 @@
+pushgateway_binary_install_dir: "/opt/pushgateway"
+pushgateway_web_listen_address: "0.0.0.0:9991"
