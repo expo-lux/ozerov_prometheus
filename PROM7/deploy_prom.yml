@@ -1,0 +1,63 @@
+---
+- name: install python3
+  hosts: all, !runner
+  become: True
+  gather_facts: no
+    
+  tasks:
+    - name: initial
+      raw: user -e /usr/bin/python3 || ( user -e /usr/bin/yum && yum -y install python3 || apt -y install python3 )
+
+- name: initial config
+  hosts: all, !runner
+  become: True
+  gather_subset:
+    - min
+    - all_ipv4_addresses
+    
+  tasks:
+    - name: initial
+      include_role:
+        name: initial
+
+- name: install Node exporter
+  hosts: node_exporter
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: 1. Make directory
+      ansible.builtin.file:
+        path: "{{ node_exporter_binary_install_dir }}"
+        state: directory
+        recurse: True
+        mode: '0777'
+
+    - name: 1. Import a Node exporter role
+      import_role:
+        name: prometheus.prometheus.node_exporter
+
+    - name: 1. Replace prometheus.yml
+      copy:
+        dest: /opt/prometheus/prometheus.yml 
+        src:  prometheus.yml
+        mode:  '0644'
+        owner: prometheus
+        group: prometheus
+
+    - name: 1. Restart Prometheus
+      systemd:
+        name: prometheus
+        state: restarted
+
+    - name: 2.1 Create /tmp/query1.txt
+      copy:
+        dest: /tmp/query1.txt
+        content: |
+          sum(irate(node_cpu_seconds_total{mode="user"}[5m]))*100
+
+    - name: 2.2 Create /tmp/query2.txt
+      copy:
+        dest: /tmp/query2.txt
+        content: |
+          node_filesystem_avail_bytes{mountpoint="/"}*100/node_filesystem_size_bytes{mountpoint="/"}

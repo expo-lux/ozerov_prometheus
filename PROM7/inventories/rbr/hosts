@@ -1,0 +1,2 @@
+[node_exporter]
+146.190.17.146 ansible_become_pass=jkmjidcbzjic; ansible_user=user

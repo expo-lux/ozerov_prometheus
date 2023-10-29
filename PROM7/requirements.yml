@@ -1,0 +1,5 @@
+---
+roles:
+  - name: initial
+    src: https://github.com/expo-lux/ansible_initial.git
+    version: "0.1.3"
