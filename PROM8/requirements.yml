@@ -1,0 +1,13 @@
+---
+roles:
+  - name: initial
+    src: https://github.com/expo-lux/ansible_initial.git
+    version: "0.1.3"
+
+  - name: redis-exporter
+    src: http://github.com/idealista/prometheus_redis_exporter_role.git
+    version: "2.1.0"
+
+  - name: redis
+    src: https://github.com/geerlingguy/ansible-role-redis
+    version: "1.8.0"

@@ -1,0 +1,78 @@
+---
+- name: install python3
+  hosts: all, !runner
+  become: True
+  gather_facts: no
+    
+  tasks:
+    - name: initial
+      raw: user -e /usr/bin/python3 || ( user -e /usr/bin/yum && yum -y install python3 || apt -y install python3 )
+
+- name: initial config
+  hosts: all, !runner
+  become: True
+  gather_subset:
+    - min
+    - all_ipv4_addresses
+    
+  tasks:
+    - name: initial
+      include_role:
+        name: initial
+
+- name: install redis
+  hosts: redis
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: 1. Import a redis role
+      import_role:
+        name: redis   
+
+- name: install Redis exporter
+  hosts: redis_exporter
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: 2. Import a redis-exporter role
+      import_role:
+        name: redis-exporter    
+
+    - name: 2.3 Replace prometheus.yml
+      copy:
+        dest: /opt/prometheus/prometheus.yml 
+        src:  prometheus.yml
+        mode:  '0644'
+        owner: prometheus
+        group: prometheus
+
+    - name: 2.3 Restart Prometheus
+      systemd:
+        name: prometheus
+        state: restarted        
+
+- name: install Grafana
+  hosts: grafana
+  become: True
+  gather_facts: True
+
+  tasks:
+    - name: 3.1 Import a Grafana role
+      import_role:
+        name: grafana.grafana.grafana 
+
+    - copy:
+        src: redis.json
+        dest: /tmp/redis.json
+
+    - name: 3.4 Import Grafana dashboard redis
+      community.grafana.grafana_dashboard:
+        grafana_url: "http://localhost:3000"
+        grafana_user: "{{ grafana_security.admin_user }}"
+        grafana_password: "{{ grafana_security.admin_password }}"
+        state: present
+        commit_message: Updated by ansible
+        overwrite: yes
+        path: /tmp/redis.json

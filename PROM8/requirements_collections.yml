@@ -1,0 +1,6 @@
+---
+collections:
+  - name: grafana.grafana
+    version: "2.2.3"
+  - name: community.grafana
+    version: "1.6.0"

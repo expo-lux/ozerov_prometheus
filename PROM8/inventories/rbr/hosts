@@ -1,0 +1,8 @@
+[grafana]
+165.22.192.231 ansible_become_pass=kfobsyixlqog; ansible_user=user
+
+[redis]
+165.22.192.231 ansible_become_pass=kfobsyixlqog; ansible_user=user
+
+[redis_exporter]
+165.22.192.231 ansible_become_pass=kfobsyixlqog; ansible_user=user
