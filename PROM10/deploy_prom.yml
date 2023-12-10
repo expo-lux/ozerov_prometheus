@@ -1,0 +1,70 @@
+---
+- name: install python3
+  hosts: all, !runner
+  become: True
+  gather_facts: no
+    
+  tasks:
+    - name: initial
+      raw: user -e /usr/bin/python3 || ( user -e /usr/bin/yum && yum -y install python3 || apt -y install python3 )
+
+- name: initial config
+  hosts: all, !runner
+  become: True
+  gather_subset:
+    - min
+    - all_ipv4_addresses
+    
+  tasks:
+    - name: initial
+      include_role:
+        name: initial
+
+- name: Install and manage alert_manager
+  hosts: alert_manager
+  become: True
+  gather_facts: True
+
+  tasks:
+
+    - name: Replace prometheus.yml
+      copy:
+        dest: /opt/prometheus/prometheus.yml 
+        src:  prometheus.yml
+        mode:  '0644'
+        owner: prometheus
+        group: prometheus
+
+    - name: Add alert rules to prometheus
+      copy:
+        dest: /opt/prometheus/alerts.yml 
+        src:  alerts.yml
+        mode:  '0644'
+        owner: prometheus
+        group: prometheus     
+
+    - name: Restart Prometheus
+      systemd:
+        name: prometheus
+        state: restarted 
+
+    - name: Install alert-manager
+      import_role:
+        name: prometheus.prometheus.alertmanager
+      vars:
+        _alertmanager_binary_install_dir: '/opt/alertmanager'
+        alertmanager_config_dir: /opt/alertmanager
+        alertmanager_receivers:
+          - name: 'email'
+            email_configs:
+              - to: 'alert@yandex.ru'
+                from: 'pzdc@yandex.ru'
+                smarthost: 'mail.yandex.ru:465'
+                auth_username: 'user'
+                auth_password: '1'
+        alertmanager_route:
+          group_by: ['...']
+          group_wait: 30s
+          group_interval: 5m
+          repeat_interval: 3h
+          receiver: 'email'

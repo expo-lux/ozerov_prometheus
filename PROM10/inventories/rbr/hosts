@@ -1,0 +1,2 @@
+[alert_manager]
+128.199.55.201 ansible_become_pass=dwtuskkxykci; ansible_user=user
